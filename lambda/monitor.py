@@ -61,6 +61,16 @@ def check_url(url):
             "checked_at": datetime.now(timezone.utc).isoformat()
         }
 
+    except Exception as e:
+        # Catches connection resets, malformed responses, and other unexpected errors
+        return {
+            "url": url,
+            "status": "DOWN",
+            "status_code": None,
+            "error": str(e),
+            "checked_at": datetime.now(timezone.utc).isoformat()
+        }
+
 def save_result_to_dynamodb(result):
     """
     Saves a check result to DynamoDB.
@@ -73,7 +83,7 @@ def save_result_to_dynamodb(result):
         "url": result["url"],
         "checked_at": result["checked_at"],
         "status": result["status"],
-        "status_code": str(result.get("status_code", "N/A")),
+        "status_code": str(result["status_code"]) if result.get("status_code") is not None else "N/A",
         "error": result.get("error", "none")
     })
 
